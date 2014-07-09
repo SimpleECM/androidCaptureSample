@@ -1,0 +1,249 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN">
+<html>
+	<head>
+		<style>
+		*{margin:0;padding:0;}
+		body {
+		    font:13.34px helvetica,arial,freesans,clean,sans-serif;
+		    color:black;
+		    line-height:1.4em;
+		    background-color: #F8F8F8;
+		    padding: 0.7em;
+		}
+		p {
+		    margin:1em 0;
+		    line-height:1.5em;
+		}
+		table {
+		    font-size:inherit;
+		    font:100%;
+		    margin:1em;
+		}
+		table th{border-bottom:1px solid #bbb;padding:.2em 1em;}
+		table td{border-bottom:1px solid #ddd;padding:.2em 1em;}
+		input[type=text],input[type=password],input[type=image],textarea{font:99% helvetica,arial,freesans,sans-serif;}
+		select,option{padding:0 .25em;}
+		optgroup{margin-top:.5em;}
+		pre,code{font:12px Monaco,"Courier New","DejaVu Sans Mono","Bitstream Vera Sans Mono",monospace;}
+		pre {
+		    margin:1em 0;
+		    font-size:12px;
+		    background-color:#eee;
+		    border:1px solid #ddd;
+		    padding:5px;
+		    line-height:1.5em;
+		    color:#444;
+		    overflow:auto;
+		    -webkit-box-shadow:rgba(0,0,0,0.07) 0 1px 2px inset;
+		    -webkit-border-radius:3px;
+		    -moz-border-radius:3px;border-radius:3px;
+		}
+		pre code {
+		    padding:0;
+		    font-size:12px;
+		    background-color:#eee;
+		    border:none;
+		}
+		code {
+		    font-size:12px;
+		    background-color:#f8f8ff;
+		    color:#444;
+		    padding:0 .2em;
+		    border:1px solid #dedede;
+		}
+		img{border:0;max-width:100%;}
+		abbr{border-bottom:none;}
+		a{color:#4183c4;text-decoration:none;}
+		a:hover{text-decoration:underline;}
+		a code,a:link code,a:visited code{color:#4183c4;}
+		h2,h3{margin:1em 0;}
+		h1,h2,h3,h4,h5,h6{border:0;}
+		h1{font-size:170%;border-top:4px solid #aaa;padding-top:.5em;margin-top:1.5em;}
+		h1:first-child{margin-top:0;padding-top:.25em;border-top:none;}
+		h2{font-size:150%;margin-top:1.5em;border-top:4px solid #e0e0e0;padding-top:.5em;}
+		h3{margin-top:1em;}
+		hr{border:1px solid #ddd;}
+		ul{margin:1em 0 1em 2em;}
+		ol{margin:1em 0 1em 2em;}
+		ul li,ol li{margin-top:.5em;margin-bottom:.5em;}
+		ul ul,ul ol,ol ol,ol ul{margin-top:0;margin-bottom:0;}
+		blockquote{margin:1em 0;border-left:5px solid #ddd;padding-left:.6em;color:#555;}
+		dt{font-weight:bold;margin-left:1em;}
+		dd{margin-left:2em;margin-bottom:1em;}
+		.warning{background-color: #FFDD73; padding: 5px;}
+		@media screen and (min-width: 768px) {
+		    body {
+		        width: 748px;
+		        margin:10px auto;
+		    }
+		}
+		</style>
+		<title>Simple ECM Image Processing SDK for Android</title>
+	</head>
+	<body>
+		<h1>
+			Simple ECM Image Processing SDK for Android
+		</h1>
+		<p>
+			<!-- Put a description here -->
+		</p>
+		<p>
+			<img src="docImage.jpg" style="display:block; margin:auto;" alt="Screenshot" title="">
+		</p>
+		<h2>
+			Features
+		</h2>
+		<ul>
+			<li>Provides a wizard view that will handle the document capture flow for you. It includes:
+				<ul>
+					<li>Image dewarping (crop image using a 4 points that form a quadrangle and straighten the resulting image)</li>
+					<li>Brightness and contrast adjustment</li>
+					<li>Clockwise and counter-clockwise rotation</li>
+					<li>Persistent storage</li>					
+					<li>Notifies of user <a href="#OnWizardFinishListener">interaction events</a></li>
+				</ul>
+			</li>
+			<li>Provides access to convert an image to black and white, or grayscale
+			</li>
+			<li>Export as PDF, JPG and PNG
+			</li>
+		</ul>
+		<h2>
+			Quick Setup
+		</h2>
+		<h3>
+			1. Include the required dependencies:
+		</h3>
+		<h4>In the SDK library project</h4>
+		<ul>
+			<li><a href="https://github.com/JakeWharton/ActionBarSherlock">ActionBarSherlock</a></li>
+			<li><a href="https://github.com/bauerca/drag-sort-listview">DragSortListView</a></li>
+		</ul>
+		<h4>In your application project</h4>
+		<ul>
+			<li>Add the SDK library to your project
+			<li>Put the SimpleECMImageProcessingLicense JAR in the <strong>libs</strong> subfolder of your project
+		</ul>		
+		<h3>
+			2. Verify your license
+		</h3>
+		In the onCreate method of your <strong>Application</strong> class, load license files and pass them to <strong>SECMLicense.verifyLicense</strong>:
+		<pre>
+			<code>
+SECMLicense.verifyLicense(
+		getResources().openRawResource(R.raw.license),
+		getResources().openRawResource(R.raw.hash), 
+		getResources().openRawResource(R.raw.pub)
+	);</code>
+		</pre>
+		<p class ="warning"><b>Note:</b> If you don't verify the license, the SDK won't apply any of the operations to the images</p>
+		<h2>
+			Using the Wizard
+		</h2>
+		<h3>
+			1. Create an <b>SECMCaptureDocumentWizardBuilder</b> instance
+		</h3>
+		You need an instance of <b>SECMCaptureDocumentWizardBuilder</b> to start using the Wizard.
+		<pre>
+			<code>
+SECMCaptureDocumentWizardBuilder mWizardBuilder = SECMCaptureDocumentWizardBuilder.getInstance(this);</code>
+		</pre>
+		<h3>
+			2. Configure the wizard builder	
+		</h3>
+			You can customize different display options in the wizard. To do so, just set the different properties with the setters provide in the <b>SECMCaptureDocumentWizardBuilder</b> instance. If you don't set a property, it will be ignored and the wizard will use its default values<br/>
+			For example, by setting the following property, you can modify the wizard's Action Bar color.
+		<pre>
+			<code>
+mWizardBuilder.setActionBarBackgroundColorResource(R.color.blue);</code>
+		</pre>			
+			For more information about wizard customization, go to the <a>SDK Javadocs</a>	
+		<h3>
+			3. Set the builder's listener
+		</h3>
+			The wizard will notify its listener whenever it is closed or the capture operation is finished.
+		<pre>
+<code>
+public class MainActivity extends Activity implements OnWizardFinishListener {
+
+	private SECMCaptureDocumentWizardBuilder mWizardBuilder;
+	...
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		...
+		mWizardBuilder.setOnWizardFinishListener(this);
+		...
+	}
+	
+	@Override
+	public void onWizardSucceed(SECMDocumentBuilder builder) {
+		
+	}
+	
+	@Override
+	public void onWizardCanceled(SECMDocumentBuilder builder, boolean isDocumentDeleted) {
+		
+	}
+}</code>
+		</pre>
+			
+		<h3>
+			4. Present the wizard
+		</h3>
+		<pre>
+<code>
+mWizardBuilder.start();</code>
+		</pre>	
+		<h3 id="OnWizardFinishListener">
+			Implementing the OnWizardFinishListener
+		</h3>
+		There are two ways to close the wizard, to cancel the capture process and to complete it successfully.</br></br>
+		When the user cancel the capture process, the wizard will notify its listener using the <code>onWizardCanceled(SECMDocumentBuilder builder, boolean wantToDelete)</code> method.
+		The <b>wantToDelete</b> flag will specify if the user wants to delete the document. You can do so using the method <code>SECMDocumentBuilder.deleteAll()</code>
+		<br/><br/>
+		When the user complete the capture process, the wizard will notify its listener using the <code>onWizardSucceed(SECMDocumentBuilder builder)</code> method.<br/>
+		You can obtain the captured images by using the <b>SECMDocumentBuilder</b>'s methods:
+		<ul>
+			<li><code>void buildPDFDocument(OnExportPDFListener listener)</code></li>
+			<li><code>void buildImagesDocument(SECMImageExportOperation.ExportFormat imageFormat, OnExportImagesListener listener)</code></li>
+			<li><code>int getImagesCount()</code></li>
+		</ul>
+		<h2>
+			Using the Core SDK functions
+		</h2>
+		If something different from what wizard provides is required, the Core SDK functions can be used instead. To do so, create a <b>SECMImage</b> object with a Bitmap object.
+		<pre>
+		<code>
+SECMImage mSECMImage = new SECMImage(mBitmap);</code>
+		</pre>
+		To apply an operation to the image, use these methods:
+		<ul>
+			<li><code>void rotate(float degrees)</code></li>
+			<li><code>void rotateFixed(SECMImageRotation rotation)</code></li>
+			<li><code>void adjustBrightnessContrast(float brightness, float contrast)</code></li>
+			<li><code>void convertToBlackAndWhite()</code></li>
+			<li><code>void convertToGrayScale()</code></li>
+			<li><code>void dewarpWithQuadrangle(SECMQuadrangle quadrangle)</code></li>
+		</ul>
+		For more information about Core SDK functions, go to the <a>SDK Javadocs</a>
+		<p class="warning">The <b>SECMImage</b> object is mutable, and applying the image operations will change it.</p>
+		Once the operations have been applied to the <b>SECMImage</b>, one can obtain a Bitmap from it using <code>SECMImage.getBitmap()</code> method. One can also use the <b>SECMImageExporter</b> to export a bitmap to a PDF, PNG or JPEG file.
+		
+		<h3>Multithreading</h3>
+		The SDK provides Runnables (<b>SECMImageOperation</b> and its subclasses) for each operation. All the operations have a <code>setOnImageOperationListener(OnImageOperationListener listener)</code> method to register a callback the operation.</br>
+		Once the operations are completed, they notify it through the <code>OnImageOperationListener.onFinished()</code> method.</br>
+		</br>
+		Also, the SDK provides the <b>SECMImageExportOperation</b> class to perform the exporting task as asynchronous operations.
+		One can register 2 different callbacks to it in order to notify that the export operation is finished:
+		<ul>
+		<li><b>OnExportPDFListener</b> which is set through the <code>setOnExportPDFListener(OnExportPDFListener listener)</code>.</br>
+		This listener notify the operation finished through the <code>OnExportPDFListener.onExportFinish(File file)</code> method which gives access to the single exported PDF file that have all the images exported.
+		</li>
+		<li><b>OnExportImagesListener</b> which is set through the <code>setOnExportImagesListener(OnExportImagesListener listener)</code>.</br>
+		This listener notify the operation finished through the <code>OnExportImagesListener.onExportFinish(List&lt;File&gt; files)</code> method which gives access to all the exported images files.
+		</li>
+		</ul>
+		<br/><br/>
+	</body>
+</html>

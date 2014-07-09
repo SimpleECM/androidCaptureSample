@@ -1,0 +1,12 @@
+com.simpleecm.imageprocessing
+com.simpleecm.imageprocessing.activities
+com.simpleecm.imageprocessing.constants
+com.simpleecm.imageprocessing.context
+com.simpleecm.imageprocessing.core
+com.simpleecm.imageprocessing.daos
+com.simpleecm.imageprocessing.dialogs
+com.simpleecm.imageprocessing.export
+com.simpleecm.imageprocessing.model
+com.simpleecm.imageprocessing.operation
+com.simpleecm.imageprocessing.utilities
+com.simpleecm.imageprocessing.views
