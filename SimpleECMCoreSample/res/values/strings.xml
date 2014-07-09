@@ -1,0 +1,28 @@
+<resources>
+
+    <string name="app_name">SimpleECM Core Sample</string>
+    <string name="takePhoto">Take photo</string>
+    <string name="pickPhoto">Pick photo</string>
+    <string name="cropPhoto">Crop photo</string>
+    <string name="rotateLeft">LR</string>
+    <string name="rotateRight">RR</string>
+    <string name="rotateAngle">RA</string>
+    <string name="brightnessContrast">B/C</string>    
+    <string name="blackWhite">BW</string>
+    <string name="grayScale">GS</string>
+    <string name="dewarp">DW</string>
+    <string name="reset">reset</string>
+    <string name="brightnessShort">B:</string>
+    <string name="contrastShort">C:</string>
+    <string name="angleShort">A:</string>    
+    <string name="initialAngle">0°</string>
+    <string name="rotateLeftInfo">LR: Left rotation</string>
+    <string name="rotateRightInfo">RR: Right rotation</string>
+    <string name="rotateAngleInfo">RA: Rotate by angle</string>
+    <string name="brightnessContrastInfo">B/C: Brightness and constrast</string>    
+    <string name="blackWhiteInfo">BW: Black and white</string>
+    <string name="grayScaleInfo">GS: Gray scale</string>
+    <string name="dewarpInfo">DW: Dewarp</string>
+    <string name="infoDialogTitle">Info</string>
+
+</resources>

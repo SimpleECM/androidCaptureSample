@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="gray_enabled">#BDBDBD</color>
+    <color name="gray_pressed">#6E6E6E</color>
+    <color name="gray_disable">#F2F2F2</color>
+    <color name="red_enabled">#FA5882</color>
+    <color name="red_pressed">#DF013A</color>
+    <color name="red_disable">#F6CED8</color>
+    <color name="blue">#45B0E7</color>
+    
+</resources>

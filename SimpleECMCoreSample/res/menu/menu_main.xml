@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <item
+        android:id="@+id/menuItemTakePhoto"
+        android:icon="@android:drawable/ic_menu_camera"
+        android:showAsAction="always"
+        android:title="@string/takePhoto"/>
+    <item
+        android:id="@+id/menuItePickPhoto"
+        android:icon="@android:drawable/ic_menu_gallery"
+        android:showAsAction="always"
+        android:title="@string/pickPhoto"/>
+    <item
+        android:id="@+id/menuItemReset"
+        android:showAsAction="always"
+        android:title="@string/reset"/>
+
+</menu>

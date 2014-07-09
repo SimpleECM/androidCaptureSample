@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">SimpleECM Wizard Sample</string>
+    <string name="openWizard">Open Wizard!</string>
+    
+    <string name="optionsTitle">Options</string>
+    <string name="cameraTitle">Take a picture</string>
+    <string name="cropTitle">Crop</string>
+    <string name="enhanceTitle">Enhance</string>
+    <string name="documentTitle">Document</string>
+    <string name="emptyDocumentListLabel">Hey! There are no images in this document.</string>
+
+</resources>

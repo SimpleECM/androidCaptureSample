@@ -1,0 +1,180 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="${relativePackage}.${activityClass}" >
+
+    <LinearLayout
+        android:id="@+id/buttonBar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_alignParentBottom="true"
+    	android:divider="?android:dividerVertical"
+        android:showDividers="middle">
+        <Button
+            android:id="@+id/btnRotateLeft"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/rotateLeft"
+            android:enabled="false"
+            style="?android:attr/buttonBarButtonStyle" />
+        <Button
+            android:id="@+id/btnRotateRight"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/rotateRight"
+            android:enabled="false"
+            style="?android:attr/buttonBarButtonStyle" />
+        <ToggleButton
+            android:id="@+id/btnRotateAngle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textOn="@string/rotateAngle"
+            android:textOff="@string/rotateAngle"
+            android:enabled="false"
+            style="?android:attr/buttonBarButtonStyle" />
+        <ToggleButton
+            android:id="@+id/btnBrightnessContrast"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textOn="@string/brightnessContrast"
+            android:textOff="@string/brightnessContrast"
+            android:enabled="false"
+            style="?android:attr/buttonBarButtonStyle" />
+        <Button
+            android:id="@+id/btnGrayScale"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/grayScale"
+            android:enabled="false"
+            style="?android:attr/buttonBarButtonStyle" />
+        <Button
+            android:id="@+id/btnBlackWhite"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/blackWhite"
+            android:enabled="false"
+            style="?android:attr/buttonBarButtonStyle" />
+        <ToggleButton
+            android:id="@+id/btnDewarp"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textOn="@string/dewarp"
+            android:textOff="@string/dewarp"
+            android:enabled="false"
+            style="?android:attr/buttonBarButtonStyle" />
+    </LinearLayout>
+    
+    <com.simpleecm.imageprocessing.sample.core.DewarpingImageView
+        android:id="@+id/imgPicture"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/buttonBar"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true" />
+    
+    <ImageButton
+        android:id="@+id/btnInfo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@android:drawable/ic_menu_info_details"
+        android:layout_alignParentRight="true"
+        android:background="@android:color/transparent"
+        android:layout_marginRight="8dp" />
+    
+    <LinearLayout
+        android:id="@+id/brightnessContrastSeekBars"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_above="@id/buttonBar"
+        android:background="@color/dim_black"
+        android:paddingLeft="16dp"
+        android:paddingRight="16dp"
+        android:paddingTop="8dp"
+        android:paddingBottom="8dp"
+        android:visibility="gone">
+        <LinearLayout 
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/brightnessShort"
+                android:gravity="center_horizontal" />
+            <SeekBar 
+                android:id="@+id/seekBrightness"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="3"
+                android:max="100"
+                android:progress="50"/>
+        </LinearLayout>
+        <LinearLayout 
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/contrastShort"
+                android:gravity="center_horizontal" />
+            <SeekBar 
+                android:id="@+id/seekContrast"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="3"
+                android:max="100"
+                android:progress="50"/>
+        </LinearLayout>
+    </LinearLayout>
+    
+    <LinearLayout
+        android:id="@+id/rotateAngleSeekBars"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_above="@id/buttonBar"
+        android:background="@color/dim_black"
+        android:paddingLeft="16dp"
+        android:paddingRight="16dp"
+        android:paddingTop="8dp"
+        android:paddingBottom="8dp"
+        android:gravity="center_vertical"
+        android:visibility="gone">
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/angleShort"
+                android:gravity="center_horizontal" />
+            <SeekBar 
+                android:id="@+id/seekAngle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="3"
+                android:max="359"
+                android:progress="0"/>
+            <TextView
+                android:id="@+id/txtAngle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/initialAngle"
+                android:gravity="center_horizontal" />
+    </LinearLayout>
+	
+</RelativeLayout>
