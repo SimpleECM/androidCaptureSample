@@ -122,12 +122,12 @@
 		<h4>In your application project</h4>
 		<ul>
 			<li>Add the SDK library to your project
-			<li>Put the SimpleECMImageProcessingLicense JAR in the <strong>libs</strong> subfolder of your project
+			<li>Put the SimpleECMImageProcessingLicense JAR in the <b>libs</b> subfolder of your project
 		</ul>		
 		<h3>
 			2. Verify your license
 		</h3>
-		In the onCreate method of your <strong>Application</strong> class, load license files and pass them to <strong>SECMLicense.verifyLicense</strong>:
+		In the onCreate method of your <b>Application</b> class, load license files and pass them to <b>SECMLicense.verifyLicense</b>:
 		<pre>
 			<code>
 SECMLicense.verifyLicense(
@@ -157,7 +157,7 @@ SECMCaptureDocumentWizardBuilder mWizardBuilder = SECMCaptureDocumentWizardBuild
 			<code>
 mWizardBuilder.setActionBarBackgroundColorResource(R.color.blue);</code>
 		</pre>			
-			For more information about wizard customization, go to the <a>SDK Javadocs</a>	
+			For more information about wizard customization, go to the SECMCaptureDocumentWizardBuilder section in <a href="http://simpleecm.github.io/androidCaptureSample/doc/">SDK Javadocs</a>	
 		<h3>
 			3. Set the builder's listener
 		</h3>
@@ -226,7 +226,7 @@ SECMImage mSECMImage = new SECMImage(mBitmap);</code>
 			<li><code>void convertToGrayScale()</code></li>
 			<li><code>void dewarpWithQuadrangle(SECMQuadrangle quadrangle)</code></li>
 		</ul>
-		For more information about Core SDK functions, go to the <a>SDK Javadocs</a>
+		For more information about Core SDK functions, go to the SECMImage section in <a href="http://simpleecm.github.io/androidCaptureSample/doc/">SDK Javadocs</a>
 		<p class="warning">The <b>SECMImage</b> object is mutable, and applying the image operations will change it.</p>
 		Once the operations have been applied to the <b>SECMImage</b>, one can obtain a Bitmap from it using <code>SECMImage.getBitmap()</code> method. One can also use the <b>SECMImageExporter</b> to export a bitmap to a PDF, PNG or JPEG file.
 		
