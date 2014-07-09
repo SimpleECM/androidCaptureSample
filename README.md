@@ -1,4 +1,4 @@
-iOSCaptureSample
+AndroidCaptureSample
 ================
 
 Sample code to show usage of the SimpleECM Mobile SDK on Android
