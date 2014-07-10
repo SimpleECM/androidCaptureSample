@@ -1,7 +1,7 @@
 AndroidCaptureSample
 ================
 
-Sample code to show usage of the SimpleECM Mobile SDK on Android
+Sample code to show usage of the SimpleECM Mobile Document Capture SDK on Android
 
 [Getting started](http://simpleecm.github.io/androidCaptureSample/)
 
