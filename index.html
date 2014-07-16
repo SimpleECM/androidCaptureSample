@@ -122,18 +122,17 @@
 		<h4>In your application project</h4>
 		<ul>
 			<li>Add the SDK library to your project
-			<li>Put the SimpleECMImageProcessingLicense JAR in the <b>libs</b> subfolder of your project
 		</ul>		
 		<h3>
 			2. Verify your license
 		</h3>
-		In the onCreate method of your <b>Application</b> class, load license files and pass them to <b>SECMLicense.verifyLicense</b>:
+		In the onCreate method of your <b>Application</b> class, load your license and hash (*.signed) and pass them and the application name (that was used to generate your license) to <b>SECMLicense.verifyLicense</b>:
 		<pre>
 			<code>
 SECMLicense.verifyLicense(
+		"AppName",
 		getResources().openRawResource(R.raw.license),
-		getResources().openRawResource(R.raw.hash), 
-		getResources().openRawResource(R.raw.pub)
+		getResources().openRawResource(R.raw.hash)
 	);</code>
 		</pre>
 		<p class ="warning"><b>Note:</b> If you don't verify the license, the SDK won't apply any of the operations to the images</p>
@@ -141,7 +140,39 @@ SECMLicense.verifyLicense(
 			Using the Wizard
 		</h2>
 		<h3>
-			1. Create an <b>SECMCaptureDocumentWizardBuilder</b> instance
+			1. Modify your Android Manifest
+		</h3>
+		Add the activities and permissions that the wizard requires to your AndroidManifest file.
+		<pre>
+			<code>
+&lt;manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    ... &gt;
+
+    &lt;!-- Need this permission to open device's camera --&gt;
+    &lt;uses-permission android:name="android.permission.CAMERA" /&gt;
+    &lt;!-- Need this permission to read photos from gallery --&gt;
+    &lt;uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" /&gt;
+    ...
+
+    &lt;application
+        ... &gt;
+        ...
+        &lt;activity android:name="com.simpleecm.imageprocessing.activities.CaptureDocumentActivity"
+            android:label="@string/optionsTitle"/&gt;
+        &lt;activity android:name="com.simpleecm.imageprocessing.activities.CaptureListActivity"
+            android:label="@string/documentTitle"/&gt;
+        &lt;activity android:name="com.simpleecm.imageprocessing.activities.CameraActivity"
+            android:theme="@android:style/Theme.NoTitleBar.Fullscreen"
+            android:label="@string/cameraTitle"/&gt;
+        &lt;activity android:name="com.simpleecm.imageprocessing.activities.DewarpActivity"
+            android:label="@string/cropTitle"/&gt;
+        &lt;activity android:name="com.simpleecm.imageprocessing.activities.EnhanceActivity"
+            android:label="@string/enhanceTitle"/&gt;
+    &lt;/application&gt;
+&lt;/manifest&gt;</code>
+		</pre>
+		<h3>
+			2. Create an <b>SECMCaptureDocumentWizardBuilder</b> instance
 		</h3>
 		You need an instance of <b>SECMCaptureDocumentWizardBuilder</b> to start using the Wizard.
 		<pre>
@@ -149,7 +180,7 @@ SECMLicense.verifyLicense(
 SECMCaptureDocumentWizardBuilder mWizardBuilder = SECMCaptureDocumentWizardBuilder.getInstance(this);</code>
 		</pre>
 		<h3>
-			2. Configure the wizard builder	
+			3. Configure the wizard builder	
 		</h3>
 			You can customize different display options in the wizard. To do so, just set the different properties with the setters provide in the <b>SECMCaptureDocumentWizardBuilder</b> instance. If you don't set a property, it will be ignored and the wizard will use its default values<br/>
 			For example, by setting the following property, you can modify the wizard's Action Bar color.
@@ -159,7 +190,7 @@ mWizardBuilder.setActionBarBackgroundColorResource(R.color.blue);</code>
 		</pre>			
 			For more information about wizard customization, go to the SECMCaptureDocumentWizardBuilder section in <a href="http://simpleecm.github.io/androidCaptureSample/doc/">SDK Javadocs</a>	
 		<h3>
-			3. Set the builder's listener
+			4. Set the builder's listener
 		</h3>
 			The wizard will notify its listener whenever it is closed or the capture operation is finished.
 		<pre>
@@ -189,7 +220,7 @@ public class MainActivity extends Activity implements OnWizardFinishListener {
 		</pre>
 			
 		<h3>
-			4. Present the wizard
+			5. Present the wizard
 		</h3>
 		<pre>
 <code>

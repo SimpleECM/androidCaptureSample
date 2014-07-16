@@ -6,6 +6,7 @@ com.simpleecm.imageprocessing.core
 com.simpleecm.imageprocessing.daos
 com.simpleecm.imageprocessing.dialogs
 com.simpleecm.imageprocessing.export
+com.simpleecm.imageprocessing.license
 com.simpleecm.imageprocessing.model
 com.simpleecm.imageprocessing.operation
 com.simpleecm.imageprocessing.utilities
