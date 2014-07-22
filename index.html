@@ -263,8 +263,10 @@ SECMImage mSECMImage = new SECMImage(mBitmap);</code>
 		
 		<h3>Multithreading</h3>
 		The SDK provides Runnables (<b>SECMImageOperation</b> and its subclasses) for each operation. All the operations have a <code>setOnImageOperationListener(OnImageOperationListener listener)</code> method to register a callback the operation.</br>
-		Once the operations are completed, they notify it through the <code>OnImageOperationListener.onFinished()</code> method.</br>
-		</br>
+		Once the operations are completed, they notify it through the <code>OnImageOperationListener.onFinished()</code> method.</br></br>
+		To execute more than one operation in a row, the <b>SECMContext</b> class might helps. It provides control of 2 <b>SECMImage</b> objects, one for source image and another for the resulting image of any operation.
+		So, you can perform any number of operations to the source image with the <code>applyOperations</code> method and get the resulting image from the <b>SECMContext</b> object when all the operations are done by a unique <code>OnImageOperationListener.onFinished()</code> callback.
+		</br></br>
 		Also, the SDK provides the <b>SECMImageExportOperation</b> class to perform the exporting task as asynchronous operations.
 		One can register 2 different callbacks to it in order to notify that the export operation is finished:
 		<ul>
