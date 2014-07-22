@@ -10,6 +10,7 @@
     <string name="brightnessContrast">B/C</string>    
     <string name="blackWhite">BW</string>
     <string name="grayScale">GS</string>
+    <string name="normal">NR</string>
     <string name="dewarp">DW</string>
     <string name="reset">reset</string>
     <string name="brightnessShort">B:</string>
@@ -19,7 +20,8 @@
     <string name="rotateLeftInfo">LR: Left rotation</string>
     <string name="rotateRightInfo">RR: Right rotation</string>
     <string name="rotateAngleInfo">RA: Rotate by angle</string>
-    <string name="brightnessContrastInfo">B/C: Brightness and constrast</string>    
+    <string name="brightnessContrastInfo">B/C: Brightness and constrast</string>
+    <string name="normalInfo">NR: Normal</string>
     <string name="blackWhiteInfo">BW: Black and white</string>
     <string name="grayScaleInfo">GS: Gray scale</string>
     <string name="dewarpInfo">DW: Dewarp</string>

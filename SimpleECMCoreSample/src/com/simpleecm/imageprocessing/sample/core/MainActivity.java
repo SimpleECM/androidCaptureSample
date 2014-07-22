@@ -12,6 +12,7 @@ import android.app.AlertDialog;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.graphics.Bitmap.Config;
 import android.graphics.PointF;
 import android.net.Uri;
 import android.os.Build;
@@ -28,78 +29,97 @@ import android.view.View.OnClickListener;
 import android.view.ViewTreeObserver.OnGlobalLayoutListener;
 import android.widget.Button;
 import android.widget.CompoundButton;
-import android.widget.ImageButton;
-import android.widget.TextView;
 import android.widget.CompoundButton.OnCheckedChangeListener;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
+import android.widget.TextView;
 import android.widget.ToggleButton;
 
+import com.simpleecm.imageprocessing.context.SECMContext;
 import com.simpleecm.imageprocessing.core.SECMImage;
-import com.simpleecm.imageprocessing.core.SECMQuadrangle;
 import com.simpleecm.imageprocessing.core.SECMImage.SECMImageRotation;
+import com.simpleecm.imageprocessing.core.SECMQuadrangle;
 import com.simpleecm.imageprocessing.operation.SECMBrightnessAndContrastOperation;
 import com.simpleecm.imageprocessing.operation.SECMConvertToBlackAndWhiteOperation;
 import com.simpleecm.imageprocessing.operation.SECMConvertToGrayscaleOperation;
 import com.simpleecm.imageprocessing.operation.SECMDewarpOperation;
+import com.simpleecm.imageprocessing.operation.SECMImageOperation;
 import com.simpleecm.imageprocessing.operation.SECMImageOperationManager.OnImageOperationListener;
 import com.simpleecm.imageprocessing.operation.SECMRotationOperation;
 
-public class MainActivity extends Activity implements OnClickListener, OnCheckedChangeListener, OnSeekBarChangeListener {
+public class MainActivity extends Activity implements OnClickListener,
+		OnCheckedChangeListener, OnSeekBarChangeListener {
 
 	private static final String TAG = "Simple ECM Core Sample";
 	private static final int REQUEST_CODE_CAMERA = 1;
 	private static final int REQUEST_CODE_GALLERY = 2;
 	private static final String KEY_PATH = "file_path";
+	private static final int FILTER_NORMAL = 0;
+	private static final int FILTER_BLACK_WHITE = 1;
+	private static final int FILTER_GRAYSCALE = 2;
 
+	private int mImageFilter = FILTER_NORMAL;
 	private File mPhotoFile;
-	private Button btnRotateLeft, btnRotateRight, btnBlackWhite, btnGrayScale;
+	private Button btnRotateLeft, btnRotateRight, btnNormal, btnBlackWhite,
+			btnGrayScale;
 	private ToggleButton btnBrightnessContrast, btnRotateAngle, btnDewarp;
 	private ImageButton btnInfo;
 	private DewarpingImageView imgPhoto;
-	private LinearLayout brightnessContrastSeekBarsContainer, angleSeekBarContainer;
+	private LinearLayout brightnessContrastSeekBarsContainer,
+			angleSeekBarContainer;
 	private SeekBar seekBrigthness, seekContrast, seekAngle;
 	private TextView txtAngle;
 	private View parentContainer, buttonBar;
-	private Bitmap mBitmap, mOriginalBitmap;
-	private SECMImage mSecmImage;
+	private SECMContext mSecmContext;
 	private float mBrightness = 0, mContrast = 1;
-	private boolean isDewarpingEnabled = false; 
+	private boolean isDewarpingEnabled = false;
+	private int mFixedAngleValue, mAngleValue;
+	private SECMQuadrangle mQuadrangle;
+	private boolean isCropped = false;
+	private SECMImageRotation mImageRotation = SECMImageRotation.SECM_IMAGE_ROTATION_0_DEGREES;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.activity_main);		
+		setContentView(R.layout.activity_main);
 		initViews();
+		SECMContext.createInstance();
+		mSecmContext = SECMContext.getInstance();
 		if (savedInstanceState != null) {
 			String path = savedInstanceState.getString(KEY_PATH);
 			if (path != null && !path.isEmpty()) {
 				mPhotoFile = new File(path);
-				// Add OnGlobalLayoutListener for getting the ImageView dimensions when it is ready
-				imgPhoto.getViewTreeObserver().addOnGlobalLayoutListener(new OnGlobalLayoutListener() {
-					
-					@SuppressWarnings("deprecation")
-					@SuppressLint("NewApi")
-					@Override
-					public void onGlobalLayout() {
-						if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-							imgPhoto.getViewTreeObserver().removeOnGlobalLayoutListener(this);
-						} else {
-							imgPhoto.getViewTreeObserver().removeGlobalOnLayoutListener(this);
-						}
-						displayImage();
-					}
-				});
+				// Add OnGlobalLayoutListener for getting the ImageView
+				// dimensions when it is ready
+				imgPhoto.getViewTreeObserver().addOnGlobalLayoutListener(
+						new OnGlobalLayoutListener() {
+
+							@SuppressWarnings("deprecation")
+							@SuppressLint("NewApi")
+							@Override
+							public void onGlobalLayout() {
+								if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+									imgPhoto.getViewTreeObserver()
+											.removeOnGlobalLayoutListener(this);
+								} else {
+									imgPhoto.getViewTreeObserver()
+											.removeGlobalOnLayoutListener(this);
+								}
+								displayImage();
+							}
+						});
 			}
 		}
-		
+
 	}
-	
+
 	private void initViews() {
 		imgPhoto = (DewarpingImageView) findViewById(R.id.imgPicture);
 		btnRotateLeft = (Button) findViewById(R.id.btnRotateLeft);
 		btnRotateRight = (Button) findViewById(R.id.btnRotateRight);
+		btnNormal = (Button) findViewById(R.id.btnNormal);
 		btnBlackWhite = (Button) findViewById(R.id.btnBlackWhite);
 		btnGrayScale = (Button) findViewById(R.id.btnGrayScale);
 		btnBrightnessContrast = (ToggleButton) findViewById(R.id.btnBrightnessContrast);
@@ -114,9 +134,10 @@ public class MainActivity extends Activity implements OnClickListener, OnChecked
 		txtAngle = (TextView) findViewById(R.id.txtAngle);
 		buttonBar = findViewById(R.id.buttonBar);
 		parentContainer = findViewById(android.R.id.content);
-		
+
 		btnRotateLeft.setOnClickListener(this);
 		btnRotateRight.setOnClickListener(this);
+		btnNormal.setOnClickListener(this);
 		btnBlackWhite.setOnClickListener(this);
 		btnGrayScale.setOnClickListener(this);
 		btnBrightnessContrast.setOnCheckedChangeListener(this);
@@ -127,10 +148,11 @@ public class MainActivity extends Activity implements OnClickListener, OnChecked
 		seekAngle.setOnSeekBarChangeListener(this);
 		btnInfo.setOnClickListener(this);
 	}
-	
+
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		//If dewarping is enabled, inflate the crop menu. Otherwise, inflate the main one.
+		// If dewarping is enabled, inflate the crop menu. Otherwise, inflate
+		// the main one.
 		if (isDewarpingEnabled) {
 			getMenuInflater().inflate(R.menu.menu_crop, menu);
 		} else {
@@ -138,7 +160,7 @@ public class MainActivity extends Activity implements OnClickListener, OnChecked
 		}
 		return super.onCreateOptionsMenu(menu);
 	}
-	
+
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
@@ -159,13 +181,13 @@ public class MainActivity extends Activity implements OnClickListener, OnChecked
 		}
 		return super.onOptionsItemSelected(item);
 	}
-	
+
 	@Override
 	protected void onSaveInstanceState(Bundle outState) {
 		super.onSaveInstanceState(outState);
 		if (mPhotoFile != null) {
 			outState.putString(KEY_PATH, mPhotoFile.getAbsolutePath());
-		}		
+		}
 	}
 
 	@Override
@@ -176,6 +198,9 @@ public class MainActivity extends Activity implements OnClickListener, OnChecked
 			break;
 		case R.id.btnRotateRight:
 			rotateRight();
+			break;
+		case R.id.btnNormal:
+			convertToNormal();
 			break;
 		case R.id.btnBlackWhite:
 			convertToBlackAndWhite();
@@ -191,7 +216,7 @@ public class MainActivity extends Activity implements OnClickListener, OnChecked
 			break;
 		}
 	}
-	
+
 	@Override
 	public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
 		switch (buttonView.getId()) {
@@ -215,7 +240,7 @@ public class MainActivity extends Activity implements OnClickListener, OnChecked
 			break;
 		}
 	}
-	
+
 	@Override
 	public void onProgressChanged(SeekBar seekBar, int progress,
 			boolean fromUser) {
@@ -255,16 +280,16 @@ public class MainActivity extends Activity implements OnClickListener, OnChecked
 		default:
 			break;
 		}
-		
+
 	}
-	
+
 	private void setDewarpingEnable(boolean isEnabled) {
 		// Enable/disable the cropping points
 		loadOrigEdges();
 		imgPhoto.setRecognized(isEnabled);
 		imgPhoto.reset();
 	}
-	
+
 	private void showOrHideView(View view, boolean show) {
 		if (show) {
 			view.setVisibility(View.VISIBLE);
@@ -276,21 +301,21 @@ public class MainActivity extends Activity implements OnClickListener, OnChecked
 	private void openCamera() {
 		Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
 		// Ensure that there's a camera activity to handle the intent
-	    if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
-	    	try {
-		    	mPhotoFile = createImageFile(".tmp");
-		    } catch (IOException e) {
+		if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
+			try {
+				mPhotoFile = createImageFile(".tmp");
+			} catch (IOException e) {
 				e.printStackTrace();
 			}
-	    	// Continue only if the File was successfully created
-		    if (mPhotoFile != null) {				
-		    	takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT,
-	                    Uri.fromFile(mPhotoFile));
-	            startActivityForResult(takePictureIntent, REQUEST_CODE_CAMERA);
+			// Continue only if the File was successfully created
+			if (mPhotoFile != null) {
+				takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT,
+						Uri.fromFile(mPhotoFile));
+				startActivityForResult(takePictureIntent, REQUEST_CODE_CAMERA);
 			}
-	    }		
+		}
 	}
-	
+
 	public void openGallery() {
 		Intent intent = new Intent(Intent.ACTION_PICK,
 				Media.EXTERNAL_CONTENT_URI);
@@ -323,7 +348,7 @@ public class MainActivity extends Activity implements OnClickListener, OnChecked
 
 		return image;
 	}
-	
+
 	// Return the path for the given Uri
 	public String getPath(Uri uri) {
 		String result = "";
@@ -337,7 +362,7 @@ public class MainActivity extends Activity implements OnClickListener, OnChecked
 		}
 		return result;
 	}
-	
+
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
@@ -345,80 +370,80 @@ public class MainActivity extends Activity implements OnClickListener, OnChecked
 			// When returns from the Gallery
 			if (requestCode == REQUEST_CODE_GALLERY) {
 				Uri selectedImageUri = data.getData();
-				String path =  getPath(selectedImageUri);
+				String path = getPath(selectedImageUri);
 				mPhotoFile = new File(path);
 			}
 			// When returns from the Gallery or Camera
-			if (requestCode == REQUEST_CODE_GALLERY || requestCode == REQUEST_CODE_CAMERA) {
+			if (requestCode == REQUEST_CODE_GALLERY
+					|| requestCode == REQUEST_CODE_CAMERA) {
 				displayImage();
 			}
-		}		
-	}
-	
-	private void displayImage() {
-		if (mBitmap != null) {
-			mBitmap.recycle();
 		}
-		int height = parentContainer.getHeight() - getActionBar().getHeight() - buttonBar.getHeight();
+	}
+
+	private void displayImage() {
+		int height = parentContainer.getHeight() - getActionBar().getHeight()
+				- buttonBar.getHeight();
 		int width = parentContainer.getWidth();
-		mBitmap = ImageUtil.getFixedBitmap(
-							width,
-							height,
-							mPhotoFile);
-		mBitmap = Bitmap.createScaledBitmap(mBitmap, width, height, true);
-		if (mBitmap != null) {
-			//Save original bitmap for reseting
-			mOriginalBitmap = Bitmap.createBitmap(mBitmap);
-			//Set the bitmap to show on the view.
-			imgPhoto.setImageBitmap(mBitmap);
-			//Add listener to notify when ImageView has change its dimensions
-			imgPhoto.getViewTreeObserver().addOnGlobalLayoutListener(new OnGlobalLayoutListener() {
-				
-				@SuppressWarnings("deprecation")
-				@SuppressLint("NewApi")
-				@Override
-				public void onGlobalLayout() {
-					if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-						imgPhoto.getViewTreeObserver().removeOnGlobalLayoutListener(this);
-					} else {
-						imgPhoto.getViewTreeObserver().removeGlobalOnLayoutListener(this);
-					}
-					imgPhoto.init(mBitmap);
-					loadOrigEdges();
-				}
-			});
-			//Enable the buttons to perform image operations
+		Bitmap bitmap = ImageUtil.getFixedBitmap(width, height, mPhotoFile);
+		bitmap = Bitmap.createScaledBitmap(bitmap, width, height, true);
+		if (bitmap != null) {
+			mSecmContext.loadSourceImage(bitmap);
+			mSecmContext.setBitmap(bitmap);
+			// Set the bitmap to show on the view.
+			imgPhoto.setImageBitmap(bitmap);
+			// Add listener to notify when ImageView has change its dimensions
+			imgPhoto.getViewTreeObserver().addOnGlobalLayoutListener(
+					new OnGlobalLayoutListener() {
+
+						@SuppressWarnings("deprecation")
+						@SuppressLint("NewApi")
+						@Override
+						public void onGlobalLayout() {
+							if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+								imgPhoto.getViewTreeObserver()
+										.removeOnGlobalLayoutListener(this);
+							} else {
+								imgPhoto.getViewTreeObserver()
+										.removeGlobalOnLayoutListener(this);
+							}
+							imgPhoto.init(mSecmContext.getBitmap());
+							loadOrigEdges();
+						}
+					});
+			// Enable the buttons to perform image operations
 			btnRotateLeft.setEnabled(true);
 			btnRotateRight.setEnabled(true);
 			btnRotateAngle.setEnabled(true);
+			btnNormal.setEnabled(true);
 			btnGrayScale.setEnabled(true);
 			btnBlackWhite.setEnabled(true);
 			btnBrightnessContrast.setEnabled(true);
 			btnDewarp.setEnabled(true);
-			mSecmImage = new SECMImage(mBitmap);
-			//Load initial edges to crop the image
+			// Load initial edges to crop the image
 		} else {
 			// Disable everything if bitmap is null
 			imgPhoto.setImageDrawable(null);
-			mSecmImage = null;
 			btnRotateLeft.setEnabled(false);
 			btnRotateRight.setEnabled(false);
 			btnRotateAngle.setEnabled(false);
+			btnNormal.setEnabled(false);
 			btnGrayScale.setEnabled(false);
 			btnBlackWhite.setEnabled(false);
 			btnBrightnessContrast.setEnabled(false);
 			btnDewarp.setEnabled(false);
 			setDewarpingEnable(false);
 		}
-		//Set unchecked as initial state for toggle buttons
+		// Set unchecked as initial state for toggle buttons
 		btnBrightnessContrast.setChecked(false);
 		btnRotateAngle.setChecked(false);
 		btnDewarp.setChecked(false);
 	}
-	
+
 	private void loadOrigEdges() {
 		PointF topLeft = new PointF(30, 30);
-		PointF topRight = new PointF(imgPhoto.getWidth() - 30, imgPhoto.getHeight() - 30);
+		PointF topRight = new PointF(imgPhoto.getWidth() - 30,
+				imgPhoto.getHeight() - 30);
 		PointF bottomLeft = new PointF(30, imgPhoto.getHeight() - 30);
 		PointF bottomRigth = new PointF(imgPhoto.getWidth() - 30, 30);
 
@@ -429,7 +454,7 @@ public class MainActivity extends Activity implements OnClickListener, OnChecked
 		imgPhoto.setRecognized(false);
 		imgPhoto.reset();
 	}
-	
+
 	private void showInfoDialog() {
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
 		LayoutInflater inflater = LayoutInflater.from(this);
@@ -437,113 +462,150 @@ public class MainActivity extends Activity implements OnClickListener, OnChecked
 		builder.setView(inflater.inflate(R.layout.dialog_info, null));
 		builder.show();
 	}
-	
-	//-----------------------------------
-	//IMAGE OPERATIONS
-	//-----------------------------------	
-	private void rotateLeft() {
-		SECMRotationOperation rotationOperation = new SECMRotationOperation(mSecmImage, SECMImageRotation.SECM_IMAGE_ROTATION_270_DEGREES);
-		rotationOperation.setOnImageOperationListener(new OnImageOperationListener() {
-			
+
+	// -----------------------------------
+	// IMAGE OPERATIONS
+	// -----------------------------------
+
+	private void executeOperations() {
+		mImageRotation = getImageRotation();
+		mSecmContext.loadSourceImage(mSecmContext.getSource().getBitmap());
+
+		SECMImageOperation rotateOperation = new SECMRotationOperation(
+				mSecmContext.getResult(), mImageRotation);
+		SECMRotationOperation rotationOperation = new SECMRotationOperation(
+				mSecmContext.getResult(), mAngleValue);
+		SECMImageOperation brigthnessContrastOperation = new SECMBrightnessAndContrastOperation(
+				mSecmContext.getResult(), mBrightness, mContrast);
+		SECMImageOperation filterOperation = null;
+		OnImageOperationListener listener = new OnImageOperationListener() {
+
 			@Override
 			public void onFinished() {
-				mBitmap = mSecmImage.getBitmap();
-				imgPhoto.setImageBitmap(mBitmap);
+				changeImage(mSecmContext.getResult());
 			}
-		});
-		rotationOperation.execute();
-	}
-	
-	private void rotateRight() {
-		SECMRotationOperation rotationOperation = new SECMRotationOperation(mSecmImage, SECMImageRotation.SECM_IMAGE_ROTATION_90_DEGREES);
-		rotationOperation.setOnImageOperationListener(new OnImageOperationListener() {
-			
-			@Override
-			public void onFinished() {
-				mBitmap = mSecmImage.getBitmap();
-				imgPhoto.setImageBitmap(mBitmap);
-			}
-		});
-		rotationOperation.execute();
-	}
-	
-	private void rotateAngle(int angle) {
-		SECMRotationOperation rotationOperation = new SECMRotationOperation(mSecmImage, angle);
-		rotationOperation.setOnImageOperationListener(new OnImageOperationListener() {
-			
-			@Override
-			public void onFinished() {
-				mBitmap = mSecmImage.getBitmap();
-				imgPhoto.setImageBitmap(mBitmap);
-			}
-		});
-		rotationOperation.execute();
-	}
-	
-	private void adjustBrightnessContrast() {
-		mSecmImage.setBitmap(mBitmap);
-		SECMBrightnessAndContrastOperation brightnessAndContrastOperation = new SECMBrightnessAndContrastOperation(mSecmImage, mBrightness, mContrast);
-		brightnessAndContrastOperation.setOnImageOperationListener(new OnImageOperationListener() {
-			
-			@Override
-			public void onFinished() {
-				imgPhoto.setImageBitmap(mSecmImage.getBitmap());
-			}
-		});
-		brightnessAndContrastOperation.execute();
-	}
-	
-	private void convertToBlackAndWhite() {
-		SECMConvertToBlackAndWhiteOperation blackAndWhiteOperation = new SECMConvertToBlackAndWhiteOperation(mSecmImage);
-		blackAndWhiteOperation.setOnImageOperationListener(new OnImageOperationListener() {
-			
-			@Override
-			public void onFinished() {
-				mBitmap = mSecmImage.getBitmap();
-				imgPhoto.setImageBitmap(mBitmap);
-			}
-		});
-		blackAndWhiteOperation.execute();
-	}
-	
-	private void convertToGrayScale() {
-		SECMConvertToGrayscaleOperation grayscaleOperation = new SECMConvertToGrayscaleOperation(mSecmImage);
-		grayscaleOperation.setOnImageOperationListener(new OnImageOperationListener() {
-			
-			@Override
-			public void onFinished() {
-				mBitmap = mSecmImage.getBitmap();
-				imgPhoto.setImageBitmap(mBitmap);
-			}
-		});
-		grayscaleOperation.execute();
-	}
-	
-	private void crop() {
-		SECMQuadrangle quadrangle = new SECMQuadrangle(imgPhoto.getTopLeft(), imgPhoto.getTopRight(), imgPhoto.getBottomLeft(), imgPhoto.getBottomRight());
-		SECMDewarpOperation dewarpOperation = new SECMDewarpOperation(mSecmImage, quadrangle);
-		dewarpOperation.setOnImageOperationListener(new OnImageOperationListener() {
-			
-			@Override
-			public void onFinished() {
-				mBitmap = mSecmImage.getBitmap();
-				imgPhoto.setImageBitmap(mBitmap);
-				btnDewarp.setChecked(false);				
-			}
-		});
-		dewarpOperation.execute();
-	}
-	
-	private void reset() {
-		if (mSecmImage != null && mBitmap != null) {
-			//restore original bitmap
-			mBitmap = Bitmap.createBitmap(mOriginalBitmap);
-			mSecmImage.setBitmap(mBitmap);
-			imgPhoto.setImageBitmap(mBitmap);
-			mBrightness = 0;
-			mContrast = 1;
-			seekBrigthness.setProgress(50);
-			seekContrast.setProgress(50);
+		};
+		switch (mImageFilter) {
+		case FILTER_BLACK_WHITE:
+			filterOperation = new SECMConvertToBlackAndWhiteOperation(
+					mSecmContext.getResult());
+			break;
+		case FILTER_GRAYSCALE:
+			filterOperation = new SECMConvertToGrayscaleOperation(
+					mSecmContext.getResult());
+			break;
+
+		default:
+			break;
 		}
+		if (isCropped) {
+			SECMDewarpOperation dewarpOperation = new SECMDewarpOperation(
+					mSecmContext.getResult(), mQuadrangle);
+			if (filterOperation == null) {
+				mSecmContext.applyOperations(listener, dewarpOperation,
+						rotationOperation, rotateOperation,
+						brigthnessContrastOperation);
+			} else {
+				mSecmContext.applyOperations(listener, dewarpOperation,
+						rotationOperation, filterOperation, rotateOperation,
+						brigthnessContrastOperation);
+			}
+		} else {
+			if (filterOperation == null) {
+				mSecmContext.applyOperations(listener, rotationOperation,
+						rotateOperation, brigthnessContrastOperation);
+			} else {
+				mSecmContext.applyOperations(listener, filterOperation,
+						rotationOperation, rotateOperation,
+						brigthnessContrastOperation);
+			}
+		}
+	}
+
+	private void changeImage(final SECMImage image) {
+		if (image == null) {
+			return;
+		}
+		imgPhoto.setImageBitmap(null);
+		mSecmContext.clearBitmap();
+		Bitmap bitmap = image.getBitmap().copy(Config.RGB_565, false);
+		mSecmContext.setBitmap(bitmap);
+		imgPhoto.setImageBitmap(bitmap);
+	}
+
+	private SECMImageRotation getImageRotation() {
+		SECMImageRotation imageRotation = SECMImageRotation.SECM_IMAGE_ROTATION_0_DEGREES;
+		if (mFixedAngleValue < 0) {
+			mFixedAngleValue += 360;
+		}
+		if (mFixedAngleValue == 360) {
+			mFixedAngleValue = 0;
+		}
+		if (mFixedAngleValue == 90) {
+			imageRotation = SECMImageRotation.SECM_IMAGE_ROTATION_90_DEGREES;
+		} else if (mFixedAngleValue == 180) {
+			imageRotation = SECMImageRotation.SECM_IMAGE_ROTATION_180_DEGREES;
+		} else if (mFixedAngleValue == 270) {
+			imageRotation = SECMImageRotation.SECM_IMAGE_ROTATION_270_DEGREES;
+		}
+		return imageRotation;
+	}
+
+	private void rotateLeft() {
+		mFixedAngleValue -= 90;
+		executeOperations();
+	}
+
+	private void rotateRight() {
+		mFixedAngleValue += 90;
+		executeOperations();
+	}
+
+	private void rotateAngle(int angle) {
+		mAngleValue = angle;
+		executeOperations();
+	}
+
+	private void adjustBrightnessContrast() {
+		executeOperations();
+	}
+
+	private void convertToBlackAndWhite() {
+		mImageFilter = FILTER_BLACK_WHITE;
+		executeOperations();
+	}
+
+	private void convertToGrayScale() {
+		mImageFilter = FILTER_GRAYSCALE;
+		executeOperations();
+	}
+
+	private void convertToNormal() {
+		mImageFilter = FILTER_NORMAL;
+		executeOperations();
+	}
+
+	private void crop() {
+		mQuadrangle = new SECMQuadrangle(imgPhoto.getTopLeft(),
+				imgPhoto.getTopRight(), imgPhoto.getBottomLeft(),
+				imgPhoto.getBottomRight());
+		isCropped = true;
+		btnDewarp.setChecked(false);
+		executeOperations();
+	}
+
+	private void reset() {
+		Bitmap bitmap = mSecmContext.getSource().getBitmap();
+		imgPhoto.setImageBitmap(bitmap);
+		mSecmContext.loadSourceImage(bitmap);
+		mSecmContext.setBitmap(bitmap);
+		mFixedAngleValue = 0;
+		seekBrigthness.setProgress(50);
+		seekContrast.setProgress(50);
+		mBrightness = 0;
+		mContrast = 1;
+		mImageFilter = FILTER_NORMAL;
+		mQuadrangle = null;
+		isCropped = false;
 	}
 }

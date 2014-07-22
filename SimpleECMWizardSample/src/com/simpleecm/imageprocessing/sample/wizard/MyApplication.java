@@ -8,10 +8,8 @@ public class MyApplication extends Application {
 	public void onCreate() {
 		super.onCreate();
 		/*
-		SECMLicense.verifyLicense(
-				getResources().openRawResource(R.raw.license), getResources()
-						.openRawResource(R.raw.hash), getResources()
-						.openRawResource(R.raw.pub));
-		*/
+		SECMLicense.verifyLicense("App name",
+				getResources().openRawResource(R.raw.dct_license), getResources()
+						.openRawResource(R.raw.dct_hash));*/
 	}
 }
