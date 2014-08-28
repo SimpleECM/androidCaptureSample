@@ -256,6 +256,7 @@ SECMImage mSECMImage = new SECMImage(mBitmap);</code>
 			<li><code>void convertToBlackAndWhite()</code></li>
 			<li><code>void convertToGrayScale()</code></li>
 			<li><code>void dewarpWithQuadrangle(SECMQuadrangle quadrangle)</code></li>
+			<li><code>void findEdges(SECMQuadrangle quadrangle)</code></li>
 		</ul>
 		For more information about Core SDK functions, go to the SECMImage section in <a href="http://simpleecm.github.io/androidCaptureSample/doc/">SDK Javadocs</a>
 		<p class="warning">The <b>SECMImage</b> object is mutable, and applying the image operations will change it.</p>
@@ -265,9 +266,11 @@ SECMImage mSECMImage = new SECMImage(mBitmap);</code>
 		The SDK provides Runnables (<b>SECMImageOperation</b> and its subclasses) for each operation. All the operations have a <code>setOnImageOperationListener(OnImageOperationListener listener)</code> method to register a callback the operation.</br>
 		Once the operations are completed, they notify it through the <code>OnImageOperationListener.onFinished()</code> method.</br></br>
 		To execute more than one operation in a row, the <b>SECMContext</b> class might helps. It provides control of 2 <b>SECMImage</b> objects, one for source image and another for the resulting image of any operation.
-		So, you can perform any number of operations to the source image with the <code>applyOperations</code> method and get the resulting image from the <b>SECMContext</b> object when all the operations are done by a unique <code>OnImageOperationListener.onFinished()</code> callback.
+		So, you can perform any number of this kind of operations to the source image with the <code>applyOperations(OnImageOperationListener listener, SECMImageOperation... operations)</code> method and get the resulting image from the <b>SECMContext</b> object through a unique <code>OnImageOperationListener.onFinished()</code> callback that is invoked when all the operations are done.
 		</br></br>
-		Also, the SDK provides the <b>SECMImageExportOperation</b> class to perform the exporting task as asynchronous operations.
+		Also, the SDK provides the <b>SECMEdgeDetectionOperation</b> class to find a quadrangle in the given image. It has a <code>OnEdgeDetectionListener.onEdgesDetected(SECMQuadrangle quadrangle)</code> callback to be invoke when the quadrangle is found and returned as a parameter. This quadrangle has a certainty factor, a float number between 0 and 1, that can be accessed by the <code>getCertainty()</code> method.
+		</br></br>
+		Furthermore, the SDK provides the <b>SECMImageExportOperation</b> class to perform the exporting task as asynchronous operations.
 		One can register 2 different callbacks to it in order to notify that the export operation is finished:
 		<ul>
 		<li><b>OnExportPDFListener</b> which is set through the <code>setOnExportPDFListener(OnExportPDFListener listener)</code>.</br>
