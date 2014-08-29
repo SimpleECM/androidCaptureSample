@@ -2,14 +2,12 @@ package com.simpleecm.imageprocessing.sample.core;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.BitmapShader;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Paint.Style;
 import android.graphics.PointF;
 import android.graphics.RectF;
-import android.graphics.Shader.TileMode;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.widget.ImageView;
@@ -33,10 +31,7 @@ public class DewarpingImageView extends ImageView {
 	private static final float ZOOM_ANIMATION_FACTOR = 10.0f;	
 
 	int mCurrentTouch = NONE;
-
-	private Bitmap mBitmap;
-	private BitmapShader mShader;
-	private Paint mZoomPaint;
+	
 	private Paint mCornerPaint;
 	private Paint mLinePaint;
 
@@ -92,7 +87,6 @@ public class DewarpingImageView extends ImageView {
 
 	public void init(Bitmap bitmap) {
 		if (bitmap != null) {
-			mZoomPaint = new Paint();
 			mCornerPaint = new Paint();
 			mLinePaint = new Paint();
 
@@ -156,11 +150,11 @@ public class DewarpingImageView extends ImageView {
 	public void drawLines(Canvas canvas) {
 		canvas.drawLine(mTopLeft.x, mTopLeft.y, mBottomLeft.x, mBottomLeft.y,
 				mLinePaint);
-		canvas.drawLine(mBottomLeft.x, mBottomLeft.y, mTopRight.x, mTopRight.y,
-				mLinePaint);
-		canvas.drawLine(mTopRight.x, mTopRight.y, mBottomRight.x,
+		canvas.drawLine(mBottomLeft.x, mBottomLeft.y, mBottomRight.x,
 				mBottomRight.y, mLinePaint);
-		canvas.drawLine(mBottomRight.x, mBottomRight.y, mTopLeft.x, mTopLeft.y,
+		canvas.drawLine(mBottomRight.x, mBottomRight.y, mTopRight.x,
+				mTopRight.y, mLinePaint);
+		canvas.drawLine(mTopRight.x, mTopRight.y, mTopLeft.x, mTopLeft.y,
 				mLinePaint);
 	}
 
@@ -272,7 +266,7 @@ public class DewarpingImageView extends ImageView {
 		width = this.getMeasuredWidth();
 		mMaxZoomX = (int) ((width / getResources().getDisplayMetrics().density)
 				-  ZOOM_START);
-		int animatioFactor = SECMDocumentCaptureUtils.dpToPx((int) ZOOM_ANIMATION_FACTOR, getContext());
+		int animatioFactor = (int) SECMDocumentCaptureUtils.dpToPx(ZOOM_ANIMATION_FACTOR, getContext());
 		if ((mZoomX < mMaxZoomX) && (!mMoveRight)) {
 			mZoomX += animatioFactor;
 			if (mZoomX > mMaxZoomX) {
@@ -295,7 +289,7 @@ public class DewarpingImageView extends ImageView {
 	}
 
 	public PointF getTopRight() {
-		return mBottomRight;
+		return mTopRight;
 	}
 
 	public PointF getBottomLeft() {
@@ -303,7 +297,7 @@ public class DewarpingImageView extends ImageView {
 	}
 
 	public PointF getBottomRight() {
-		return mTopRight;
+		return mBottomRight;
 	}
 
 	public void setTopLeft(PointF point) {

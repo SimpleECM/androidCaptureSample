@@ -4,7 +4,12 @@
     <item
         android:id="@+id/menuItemCropPhoto"
         android:icon="@android:drawable/ic_menu_crop"
-        android:showAsAction="always"
+        android:showAsAction="ifRoom"
         android:title="@string/cropPhoto"/>
+    
+    <item
+        android:id="@+id/menuItemFindEdges"
+        android:showAsAction="ifRoom"
+        android:title="@string/findEdges"/>
 
 </menu>

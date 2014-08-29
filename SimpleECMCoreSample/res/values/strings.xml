@@ -4,6 +4,7 @@
     <string name="takePhoto">Take photo</string>
     <string name="pickPhoto">Pick photo</string>
     <string name="cropPhoto">Crop photo</string>
+    <string name="findEdges">Find edges</string>
     <string name="rotateLeft">LR</string>
     <string name="rotateRight">RR</string>
     <string name="rotateAngle">RA</string>
@@ -12,7 +13,6 @@
     <string name="grayScale">GS</string>
     <string name="normal">NR</string>
     <string name="dewarp">DW</string>
-    <string name="reset">reset</string>
     <string name="brightnessShort">B:</string>
     <string name="contrastShort">C:</string>
     <string name="angleShort">A:</string>    

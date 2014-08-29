@@ -45,6 +45,8 @@ import com.simpleecm.imageprocessing.operation.SECMBrightnessAndContrastOperatio
 import com.simpleecm.imageprocessing.operation.SECMConvertToBlackAndWhiteOperation;
 import com.simpleecm.imageprocessing.operation.SECMConvertToGrayscaleOperation;
 import com.simpleecm.imageprocessing.operation.SECMDewarpOperation;
+import com.simpleecm.imageprocessing.operation.SECMEdgeDetectionOperation;
+import com.simpleecm.imageprocessing.operation.SECMEdgeDetectionOperation.OnEdgeDetectionListener;
 import com.simpleecm.imageprocessing.operation.SECMImageOperation;
 import com.simpleecm.imageprocessing.operation.SECMImageOperationManager.OnImageOperationListener;
 import com.simpleecm.imageprocessing.operation.SECMRotationOperation;
@@ -175,6 +177,9 @@ public class MainActivity extends Activity implements OnClickListener,
 			break;
 		case R.id.menuItemCropPhoto:
 			crop();
+			break;
+		case R.id.menuItemFindEdges:
+			findEdges();
 			break;
 		default:
 			break;
@@ -442,10 +447,10 @@ public class MainActivity extends Activity implements OnClickListener,
 
 	private void loadOrigEdges() {
 		PointF topLeft = new PointF(30, 30);
-		PointF topRight = new PointF(imgPhoto.getWidth() - 30,
-				imgPhoto.getHeight() - 30);
+		PointF topRight = new PointF(imgPhoto.getWidth() - 30, 30);
 		PointF bottomLeft = new PointF(30, imgPhoto.getHeight() - 30);
-		PointF bottomRigth = new PointF(imgPhoto.getWidth() - 30, 30);
+		PointF bottomRigth = new PointF(imgPhoto.getWidth() - 30,
+				imgPhoto.getHeight() - 30);
 
 		imgPhoto.setTopLeft(topLeft);
 		imgPhoto.setTopRight(topRight);
@@ -502,13 +507,13 @@ public class MainActivity extends Activity implements OnClickListener,
 			SECMDewarpOperation dewarpOperation = new SECMDewarpOperation(
 					mSecmContext.getResult(), mQuadrangle);
 			if (filterOperation == null) {
-				mSecmContext.applyOperations(listener, dewarpOperation,
+				mSecmContext.applyOperations(listener,
 						rotationOperation, rotateOperation,
-						brigthnessContrastOperation);
+						brigthnessContrastOperation, dewarpOperation);
 			} else {
-				mSecmContext.applyOperations(listener, dewarpOperation,
+				mSecmContext.applyOperations(listener,
 						rotationOperation, filterOperation, rotateOperation,
-						brigthnessContrastOperation);
+						brigthnessContrastOperation, dewarpOperation);
 			}
 		} else {
 			if (filterOperation == null) {
@@ -592,6 +597,25 @@ public class MainActivity extends Activity implements OnClickListener,
 		isCropped = true;
 		btnDewarp.setChecked(false);
 		executeOperations();
+	}
+	
+	private void findEdges() {
+		SECMEdgeDetectionOperation findEdgesOperation = new SECMEdgeDetectionOperation(mSecmContext.getResult());
+		findEdgesOperation.setOnEdgeDectectionListener(new OnEdgeDetectionListener() {
+			
+			@Override
+			public void onEdgesDetected(SECMQuadrangle quadrangle) {
+				// Draw the detected edges
+				mQuadrangle = quadrangle;
+				imgPhoto.setTopLeft(mQuadrangle.getTopLeft());
+				imgPhoto.setTopRight(mQuadrangle.getTopRight());
+				imgPhoto.setBottomLeft(mQuadrangle.getBottomLeft());
+				imgPhoto.setBottomRight(mQuadrangle.getBottomRight());
+				imgPhoto.setRecognized(true);
+				imgPhoto.reset();
+			}
+		});
+		findEdgesOperation.execute();
 	}
 
 	private void reset() {

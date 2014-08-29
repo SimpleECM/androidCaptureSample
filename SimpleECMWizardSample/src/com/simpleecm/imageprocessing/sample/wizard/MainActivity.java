@@ -53,7 +53,8 @@ public class MainActivity extends Activity implements OnClickListener,
 		 * SECMCaptureDocumentWizardBuilder instance. There are some values that
 		 * are set by default, like camera icons, grid color, texts of Buttons
 		 * and TextViews, etc. In order to customize activity titles, they could
-		 * be set in manifest with the "label" attribute.
+		 * be set in manifest with the "label" attribute. Also, can enable/disable
+		 * some functionalities like camera autofocus, live framing, auto shot, etc.
 		 */
 		mWizardBuilder
 				.setPositiveButtonBackground(R.drawable.btn_gray_background);
@@ -76,7 +77,6 @@ public class MainActivity extends Activity implements OnClickListener,
 	@Override
 	public void onWizardSucceed(SECMDocumentBuilder builder) {
 		Log.i(TAG, "Wizard suceeded");
-
 	}
 
 	/*
